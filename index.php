@@ -13,17 +13,39 @@ try {
     $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-        $titulo = $_POST['titulo'];
-        $autor = $_POST['autor'];
-        $genero = $_POST['genero'];
-        $anio = $_POST['anio'];
+        if (isset($_POST['add'])) {
+            $titulo = $_POST['titulo'];
+            $autor = $_POST['autor'];
+            $genero = $_POST['genero'];
+            $anio = $_POST['anio'];
 
-        $stmt = $conn->prepare("INSERT INTO libros (titulo, autor, genero, anio) VALUES (:titulo, :autor, :genero, :anio)");
-        $stmt->bindParam(':titulo', $titulo);
-        $stmt->bindParam(':autor', $autor);
-        $stmt->bindParam(':genero', $genero);
-        $stmt->bindParam(':anio', $anio);
-        $stmt->execute();
+            $stmt = $conn->prepare("INSERT INTO libros (titulo, autor, genero, anio) VALUES (:titulo, :autor, :genero, :anio)");
+            $stmt->bindParam(':titulo', $titulo);
+            $stmt->bindParam(':autor', $autor);
+            $stmt->bindParam(':genero', $genero);
+            $stmt->bindParam(':anio', $anio);
+            $stmt->execute();
+        } elseif (isset($_POST['edit'])) {
+            $id = $_POST['id'];
+            $titulo = $_POST['titulo'];
+            $autor = $_POST['autor'];
+            $genero = $_POST['genero'];
+            $anio = $_POST['anio'];
+
+            $stmt = $conn->prepare("UPDATE libros SET titulo = :titulo, autor = :autor, genero = :genero, anio = :anio WHERE id = :id");
+            $stmt->bindParam(':id', $id);
+            $stmt->bindParam(':titulo', $titulo);
+            $stmt->bindParam(':autor', $autor);
+            $stmt->bindParam(':genero', $genero);
+            $stmt->bindParam(':anio', $anio);
+            $stmt->execute();
+        } elseif (isset($_POST['delete'])) {
+            $id = $_POST['id'];
+
+            $stmt = $conn->prepare("DELETE FROM libros WHERE id = :id");
+            $stmt->bindParam(':id', $id);
+            $stmt->execute();
+        }
     }
 
     $stmt = $conn->prepare("SELECT * FROM libros");
@@ -44,6 +66,7 @@ try {
     <h1>Mis Libros</h1>
 
     <form method="post" action="">
+        <input type="hidden" name="id" id="id">
         <label for="titulo">Título:</label>
         <input type="text" id="titulo" name="titulo" required><br>
         <label for="autor">Autor:</label>
@@ -52,7 +75,8 @@ try {
         <input type="text" id="genero" name="genero" required><br>
         <label for="anio">Año:</label>
         <input type="number" id="anio" name="anio" required><br>
-        <input type="submit" value="Agregar Libro">
+        <input type="submit" name="add" value="Agregar Libro">
+        <input type="submit" name="edit" value="Modificar Libro">
     </form>
 
     <table>
@@ -62,6 +86,7 @@ try {
                 <th>Autor</th>
                 <th>Género</th>
                 <th>Año</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody>
@@ -71,6 +96,20 @@ try {
                     <td><?php echo htmlspecialchars($libro['autor']); ?></td>
                     <td><?php echo htmlspecialchars($libro['genero']); ?></td>
                     <td><?php echo htmlspecialchars($libro['anio']); ?></td>
+                    <td>
+                        <form method="post" action="" style="display:inline;">
+                            <input type="hidden" name="id" value="<?php echo $libro['id']; ?>">
+                            <input type="hidden" name="titulo" value="<?php echo htmlspecialchars($libro['titulo']); ?>">
+                            <input type="hidden" name="autor" value="<?php echo htmlspecialchars($libro['autor']); ?>">
+                            <input type="hidden" name="genero" value="<?php echo htmlspecialchars($libro['genero']); ?>">
+                            <input type="hidden" name="anio" value="<?php echo htmlspecialchars($libro['anio']); ?>">
+                            <input type="submit" name="edit" value="Editar">
+                        </form>
+                        <form method="post" action="" style="display:inline;">
+                            <input type="hidden" name="id" value="<?php echo $libro['id']; ?>">
+                            <input type="submit" name="delete" value="Eliminar">
+                        </form>
+                    </td>
                 </tr>
             <?php endforeach; ?>
         </tbody>
