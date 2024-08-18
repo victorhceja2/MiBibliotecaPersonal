@@ -38,6 +38,7 @@ try {
 <html>
 <head>
     <title>Mi Biblioteca Personal</title>
+    <link rel="stylesheet" type="text/css" href="css/styles.css">
 </head>
 <body>
     <h1>Mis Libros</h1>
